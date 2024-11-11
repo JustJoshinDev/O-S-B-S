@@ -10,10 +10,10 @@ class MyGUI(QMainWindow):  # Main window setup
         self.ui = ui_main.Ui_MainWindow()
         self.ui.setupUi(self)
         self.show()
-        
+
         self.bible_versions = {
-            "American Standard Version": f'{os.path.dirname(os.path.abspath(__file__))}\\.\\db\\asv.html',
-            "King James Version": f'{os.path.dirname(os.path.abspath(__file__))}\\.\\db\\kjv.html',
+            "American Standard Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'asv.html'),
+            "King James Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html'),
         }
         
         # Initialize default font settings
@@ -23,13 +23,16 @@ class MyGUI(QMainWindow):  # Main window setup
         self.currentFormat = QTextCharFormat()  # Store current format
 
         # Initialize KJV Bible
-        html_file_path = os.path.abspath(f'{os.path.dirname(os.path.abspath(__file__))}\\.\\db\\kjv.html')
-        self.ui.webEngineView.load(QUrl.fromLocalFile(html_file_path))
-        self.ui.webEngineView.setZoomFactor(8)
-        self.ui.actionShow_Bible.setText("Hide Bible")
-        
-        self.setWindowTitle("Open Source Bible System v0.0")
-        self.ui.textEdit.setAcceptRichText = True
+        html_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html')
+        if os.path.isfile(html_file_path) and os.access(html_file_path, os.R_OK):
+            self.ui.webEngineView.load(QUrl.fromLocalFile(html_file_path))
+            self.ui.webEngineView.setZoomFactor(8)
+            self.ui.actionShow_Bible.setText("Hide Bible")
+        else:
+            print(f"File not found or not readable: {html_file_path}")
+
+        self.setWindowTitle("Open Source Bible System v0.0.3")
+        self.ui.textEdit.setAcceptRichText(True)
 
         # Connect signals
         self.ui.testSize.valueChanged.connect(self.update_font_size)

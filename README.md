@@ -7,5 +7,5 @@ Made in Python with PySide6!
 
 Current Source Code Version: INDEV 0.0.3
 
-#Changelog:#
+#Changelog:
 

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QFileDialog, QColorDialog, QMainWindow, QApplication
-from PySide6.QtGui import QTextCharFormat, QFont, QTextCursor
-from PySide6.QtCore import QUrl, QFile
+from PySide6.QtGui import QTextCharFormat, QFont, QTextCursor, QIcon
+from PySide6.QtCore import QUrl, QSize
 import os.path
 import ui_main
 
@@ -15,14 +15,33 @@ class MyGUI(QMainWindow):  # Main window setup
             "American Standard Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'asv.html'),
             "King James Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html'),
         }
+
+        self.bold = False
+        self.italic = False
+        self.underline = False
         
-        # Initialize default font settings
+    # Initialize Button Icons
+        self.bold_icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'bold-button.png')
+        self.italic_icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'italic-button.png')
+        self.underline_icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'underline.png')
+        self.color_icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'wheel.png')
+
+        self.ui.boldButton.setIcon(QIcon(self.bold_icon))
+        self.ui.boldButton.setIconSize(QSize(24, 24))
+        self.ui.italicButton.setIcon(QIcon(self.italic_icon))
+        self.ui.italicButton.setIconSize(QSize(24, 24))
+        self.ui.underlineButton.setIcon(QIcon(self.underline_icon))
+        self.ui.underlineButton.setIconSize(QSize(24, 24))
+        self.ui.colorButton.setIcon(QIcon(self.color_icon))
+        self.ui.colorButton.setIconSize(QSize(24, 24))
+
+    # Initialize default font settings
         self.bible_size_value = 8
         self.ui.testSize.setValue(12)
         self.ui.fontSelect.setCurrentFont(QFont('Arial'))
         self.currentFormat = QTextCharFormat()  # Store current format
 
-        # Initialize KJV Bible
+    # Initialize KJV Bible
         html_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html')
         if os.path.isfile(html_file_path) and os.access(html_file_path, os.R_OK):
             self.ui.webEngineView.load(QUrl.fromLocalFile(html_file_path))
@@ -31,20 +50,73 @@ class MyGUI(QMainWindow):  # Main window setup
         else:
             print(f"File not found or not readable: {html_file_path}")
 
-        self.setWindowTitle("Open Source Bible System v0.0.3")
+        self.setWindowTitle("Open Source Bible System v0.0.4")
         self.ui.textEdit.setAcceptRichText(True)
 
-        # Connect signals
+    # Connect signals
+        # Formatting
         self.ui.testSize.valueChanged.connect(self.update_font_size)
         self.ui.fontSelect.currentFontChanged.connect(self.update_font_family)
         self.ui.colorButton.clicked.connect(self.choose_color)
-        self.ui.actionOpen.triggered.connect(self.open_file)
-        self.ui.actionSave.triggered.connect(self.save_file)
+        self.ui.boldButton.clicked.connect(self.font_bold)
+        self.ui.italicButton.clicked.connect(self.font_italic)
+        self.ui.underlineButton.clicked.connect(self.font_underline)
+
+        # Bible Settings
         self.ui.actionShow_Bible.triggered.connect(self.toggle_bible_window)
         self.ui.bibleSizeUp.clicked.connect(lambda: self.update_bible_size(-1))
         self.ui.bibleSizeDown.clicked.connect(lambda: self.update_bible_size(1))
         self.ui.bibleSelection.currentTextChanged.connect(self.update_bible_version)
         self.ui.bibleSelection.textActivated.connect(self.load_custom_bible)
+        
+        # System Buttons
+        self.ui.actionOpen.triggered.connect(self.open_file)
+        self.ui.actionSave.triggered.connect(self.save_file)
+
+        self.ui.textEdit.cursorPositionChanged.connect(self.update_format_ui)
+    
+    def update_format_ui(self):
+        cursor = self.ui.textEdit.textCursor()
+        char_format = cursor.charFormat()
+
+        self.ui.testSize.setValue(char_format.fontPointSize())
+        self.ui.fontSelect.setCurrentFont(QFont(char_format.font().family()))
+        self.italic = char_format.fontItalic()
+        self.underline = char_format.fontUnderline()
+        if char_format.fontWeight() == 1000:
+            self.bold = True
+        else:
+            self.bold = False
+        
+        color = char_format.foreground().color()
+        if color.isValid():
+            self.ui.colorButton.setStyleSheet(f"background-color: {color.name()};")
+        
+    def font_bold(self):
+        if not self.bold:
+            self.currentFormat.setFontWeight(1000)
+            self.ui.textEdit.setCurrentCharFormat(self.currentFormat)
+            self.bold = True
+        else:
+            self.currentFormat.setFontWeight(500)
+            self.ui.textEdit.setCurrentCharFormat(self.currentFormat)
+            self.bold = False
+    
+    def font_italic(self):
+        if self.italic:
+            self.italic = False
+        else:
+            self.italic = True
+        self.currentFormat.setFontItalic(self.italic)
+        self.ui.textEdit.setCurrentCharFormat(self.currentFormat)
+    
+    def font_underline(self):
+        if self.underline:
+            self.underline = False
+        else:
+            self.underline = True
+        self.currentFormat.setFontUnderline(self.underline)
+        self.ui.textEdit.setCurrentCharFormat(self.currentFormat)
         
     def update_bible_version(self):
         if self.ui.bibleSelection.currentText() != "Custom HTML...":
@@ -87,12 +159,12 @@ class MyGUI(QMainWindow):  # Main window setup
             with open(filename, "r") as f:
                 self.ui.textEdit.setHtml(f.read())
                 
-            self.update_format_ui()
+            self.load_format_ui()
 
-    def update_format_ui(self):
-        # Get the format of the first character in the document
+    def load_format_ui(self):
+        # Get the format of the last character in the document
         cursor = self.ui.textEdit.textCursor()
-        cursor.movePosition(QTextCursor.Start)  # Move to end of document
+        cursor.movePosition(QTextCursor.End)  # Move to end of document
         self.ui.textEdit.setTextCursor(cursor)
         char_format = cursor.charFormat()
 

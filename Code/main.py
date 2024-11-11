@@ -12,8 +12,8 @@ class MyGUI(QMainWindow):  # Main window setup
         self.show()
 
         self.bible_versions = {
-            "American Standard Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'asv.html'),
-            "King James Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html'),
+            "American Standard Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html'),
+            "King James Version": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'asv.html'),
         }
 
         self.bold = False
@@ -42,7 +42,7 @@ class MyGUI(QMainWindow):  # Main window setup
         self.currentFormat = QTextCharFormat()  # Store current format
 
     # Initialize KJV Bible
-        html_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'kjv.html')
+        html_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db', 'asv.html')
         if os.path.isfile(html_file_path) and os.access(html_file_path, os.R_OK):
             self.ui.webEngineView.load(QUrl.fromLocalFile(html_file_path))
             self.ui.webEngineView.setZoomFactor(8)

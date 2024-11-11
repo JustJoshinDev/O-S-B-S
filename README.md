@@ -5,7 +5,7 @@ This is a project by @JustJoshinDev & @TheJupiterDev to solve the issue of no go
 
 Made in Python with PySide6!
 
-Current Source Code Version: INDEV 0.0.3
+Current Source Code Version: INDEV 0.0.4
 
 # Changelog:
 

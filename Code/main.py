@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QFileDialog, QColorDialog, QMainWindow, QApplication
+from PySide6.QtWidgets import QFileDialog, QColorDialog, QMainWindow, QApplication, QWidget
 from PySide6.QtGui import QTextCharFormat, QFont, QTextCursor, QIcon
 from PySide6.QtCore import QUrl, QSize
 import os.path
 import ui_main
+import ui_verseotd
 
 class MyGUI(QMainWindow):  # Main window setup
     def __init__(self):         
@@ -74,6 +75,15 @@ class MyGUI(QMainWindow):  # Main window setup
         self.ui.actionSave.triggered.connect(self.save_file)
 
         self.ui.textEdit.cursorPositionChanged.connect(self.update_format_ui)
+    
+    # Verse of the Day Popup
+        self.show_verse_of_the_day()
+    
+    def show_verse_of_the_day(self):
+        self.votd_parent = QWidget()
+        self.votd = ui_verseotd.Ui_Form()
+        self.votd.setupUi(self.votd_parent)
+        self.votd_parent.show()
     
     def update_format_ui(self):
         cursor = self.ui.textEdit.textCursor()

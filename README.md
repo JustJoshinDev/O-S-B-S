@@ -5,9 +5,11 @@ This is a project by @JustJoshinDev & @TheJupiterDev to solve the issue of no go
 
 Made in Python with PySide6!
 
-Current Source Code Version: INDEV 0.0.4
+Current Source Code Version: INDEV 0.0.5
 
 # Changelog:
+
+INDEV 0.0.5: Fixed some bugs, added MacOS Binary.
 
 INDEV 0.0.4: Added Bold, Italics, Underline, and fixed some bugs.
 
